@@ -1,8 +1,12 @@
 package com.wx.binary_tree;
 
-import java.util.Comparator;
+import java.util.*;
 
 public class Tree<T extends Comparable<T>> {
+
+    private Node<T>[] arrayTree;
+
+    private int size;
 
     public void infixOrder(Node<T> root) {
         if (root == null) {
@@ -283,6 +287,135 @@ public class Tree<T extends Comparable<T>> {
         return true;
     }
 
+    public void remove(T element, Node<T> root) {
+
+
+        if(root.left != null && root.left.element == element) {
+            root.left = null;
+            return;
+        }
+
+        if(root.right != null && root.right.element == element) {
+            root.right = null;
+            return;
+        }
+
+        if(root.left != null && root.left != element) {
+            remove(element, root.left);
+        }
+
+        if(root.right != null && root.right != element) {
+            remove(element, root.right);
+        }
+
+
+    }
+
+    /**
+     * 需求：
+     * 如果删除的结点是叶子结点 直接删除
+     *
+     * 如果删除的结点是非叶子结点
+     * 1. 该结点仅有一个子结点 ，使用该结点的子结点 替换该结点
+     * 2. 该结点有两个子结点， 使用该结点的左结点 替换该结点
+     *
+     * @param element
+     * @param root
+     */
+    public void remove1(T element, Node<T> root) {
+
+
+        if(root.left != null && root.left.element == element) {
+
+            if(root.left.left == null && root.left.right == null) {
+                root.left = null;
+            }else if(root.left.left != null && root.left.right != null) {
+                root.left = root.left.left;
+            }else if(root.left.left != null) {
+                root.left = root.left.left;
+            }else {
+                root.left = root.left.right;
+            }
+            return;
+        }
+
+        if(root.right != null && root.right.element == element) {
+            if(root.right.left == null && root.right.right == null) {
+                root.right = null;
+            }else if(root.right.left != null && root.right.right != null) {
+                root.right = root.right.left;
+            }else if(root.right.left != null) {
+                root.right = root.right.left;
+            }else {
+                root.right = root.right.right;
+            }
+            return;
+        }
+
+        if(root.left != null && root.left != element) {
+            remove1(element, root.left);
+        }
+
+        if(root.right != null && root.right != element) {
+            remove1(element, root.right);
+        }
+
+
+    }
+
+    public Node[] storageArray(Node<T> root) {
+        System.out.println("size: " + size);
+
+        int height = height(this.root);
+        System.out.println("height: " + height);
+
+        int length = (1 << (height + 1)) - 1;
+        System.out.println("length: " + length);
+        arrayTree = new Node[length];
+
+
+        int i = 0;
+
+        LinkedList<Node<T>> nodes = new LinkedList<>();
+        nodes.add(root);
+        while (! nodes.isEmpty()) {
+            Node<T> tNode = nodes.removeFirst();
+            arrayTree[i++] = tNode;
+
+            if(i == length) break;
+
+            if(tNode == null) {
+                nodes.add(null);
+                nodes.add(null);
+            }else {
+
+                nodes.add(tNode.left);
+                nodes.add(tNode.right);
+            }
+        }
+
+        return arrayTree;
+
+    }
+
+    public Node<T> convertArray2Tree(Node<T>[] nodes,  int i) {
+
+
+        T element = nodes[i].element;
+        Node<T> node = new Node<>(element, null, null);
+
+        if(2 * i + 1 < nodes.length && nodes[2 * i + 1] != null) {
+            node.left = convertArray2Tree(nodes, 2 * i + 1);
+        }
+
+        if(2 * i + 2 < nodes.length && nodes[2 * i + 2] != null) {
+            node.right = convertArray2Tree(nodes, 2 * i + 2);
+        }
+
+        return node;
+    }
+
+
     public static class Node<T> {
         private T element;
         private Node<T> left;
@@ -323,6 +456,7 @@ public class Tree<T extends Comparable<T>> {
     public Node<T> insert(T element, Node<T> node) {
 
         if (node == null) {
+            size++;
             return new Node<T>(element, null, null);
         }
 
